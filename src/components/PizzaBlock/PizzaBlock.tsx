@@ -1,4 +1,4 @@
-import { act, useState } from 'react';
+import { useState } from 'react';
 
 export default function PizzaBlock({ title, price, imageUrl, sizes, types }: any) {
   const [activeType, setActiveType] = useState(0);
