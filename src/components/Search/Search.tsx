@@ -1,6 +1,10 @@
+import { useContext } from 'react';
 import styles from './Search.module.scss';
+import SearchContext from '../../context';
 
-export default function Search({ searchValue, setSearchValue }: any) {
+export default function Search() {
+  const { searchValue, setSearchValue }: any = useContext(SearchContext);
+
   return (
     <div className={styles.root}>
       <svg
@@ -23,7 +27,7 @@ export default function Search({ searchValue, setSearchValue }: any) {
       />
       {searchValue && (
         <svg
-        onClick={() => setSearchValue('')}
+          onClick={() => setSearchValue('')}
           className={styles.clearIcon}
           viewBox="0 0 20 20"
           xmlns="http://www.w3.org/2000/svg">

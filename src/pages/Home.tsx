@@ -1,14 +1,18 @@
-import { useEffect, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import Categories from '../components/Categories';
 import PizzaBlock from '../components/PizzaBlock/PizzaBlock';
 import Skeleton from '../components/PizzaBlock/Skeleton';
 import Sort from '../components/Sort';
 import axios from 'axios';
+import Pagination from '../components/Pagination/Pagination';
+import SearchContext from '../context';
 
-export default function Home({ searchValue }: any) {
+export default function Home() {
+  const { searchValue }: any = useContext(SearchContext);
   const [items, setItems] = useState<any[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [categoryId, setCategoryId] = useState(0);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [categoryId, setCategoryId] = useState<number>(0);
+  const [currentPage, setCurrentPage] = useState<number>(1);
   const [sortType, setSortType] = useState({
     name: 'популярности (▼)',
     sortProperty: 'rating',
@@ -21,10 +25,10 @@ export default function Home({ searchValue }: any) {
         const order = sortType.sortProperty.includes('-') ? 'asc' : 'desc';
         const sortBy = sortType.sortProperty.replace('-', '');
         const category = categoryId !== 0 ? `category=${categoryId}` : '';
-        const search = searchValue ? `&search=${searchValue}` : '';
+        const search = searchValue ? `&search=${searchValue.trim()}` : '';
 
         const { data } = await axios.get(
-          `https://681b8d1817018fe5057bff3f.mockapi.io/items?${category}&sortBy=${sortBy}&order=${order}${search}`,
+          `https://681b8d1817018fe5057bff3f.mockapi.io/items?page=${currentPage}&limit=4&${category}&sortBy=${sortBy}&order=${order}${search}`,
         );
         setItems(data);
         setIsLoading(false);
@@ -35,12 +39,12 @@ export default function Home({ searchValue }: any) {
     }
     window.scrollTo(0, 0);
     fetchData();
-  }, [categoryId, sortType, searchValue]);
+  }, [categoryId, sortType, searchValue, currentPage]);
 
   const pizzas = items
     // .filter((obj) => obj.name.toLowerCase().includes(searchValue.toLowerCase().trim()))
     .map((obj) => <PizzaBlock key={obj.id} {...obj} />);
-  const skeletons = [...new Array(9)].map((_, index) => <Skeleton key={index} />);
+  const skeletons = [...new Array(4)].map((_, index) => <Skeleton key={index} />);
 
   return (
     <div className="container">
@@ -50,6 +54,7 @@ export default function Home({ searchValue }: any) {
       </div>
       <h2 className="content__title">Все пиццы</h2>
       <div className="content__items">{isLoading ? skeletons : pizzas}</div>
+      <Pagination onChangePage={(number: number) => setCurrentPage(number)} />
     </div>
   );
 }
