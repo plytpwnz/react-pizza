@@ -5,7 +5,7 @@ import Skeleton from '../components/PizzaBlock/Skeleton';
 import Sort from '../components/Sort';
 import axios from 'axios';
 
-export default function Home() {
+export default function Home({ searchValue }: any) {
   const [items, setItems] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [categoryId, setCategoryId] = useState(0);
@@ -21,9 +21,10 @@ export default function Home() {
         const order = sortType.sortProperty.includes('-') ? 'asc' : 'desc';
         const sortBy = sortType.sortProperty.replace('-', '');
         const category = categoryId !== 0 ? `category=${categoryId}` : '';
+        const search = searchValue ? `&search=${searchValue}` : '';
 
         const { data } = await axios.get(
-          `https://681b8d1817018fe5057bff3f.mockapi.io/items?${category}&sortBy=${sortBy}&order=${order}`,
+          `https://681b8d1817018fe5057bff3f.mockapi.io/items?${category}&sortBy=${sortBy}&order=${order}${search}`,
         );
         setItems(data);
         setIsLoading(false);
@@ -34,7 +35,12 @@ export default function Home() {
     }
     window.scrollTo(0, 0);
     fetchData();
-  }, [categoryId, sortType]);
+  }, [categoryId, sortType, searchValue]);
+
+  const pizzas = items
+    // .filter((obj) => obj.name.toLowerCase().includes(searchValue.toLowerCase().trim()))
+    .map((obj) => <PizzaBlock key={obj.id} {...obj} />);
+  const skeletons = [...new Array(9)].map((_, index) => <Skeleton key={index} />);
 
   return (
     <div className="container">
@@ -43,11 +49,7 @@ export default function Home() {
         <Sort value={sortType} onChangeSort={(obj: any) => setSortType(obj)} />
       </div>
       <h2 className="content__title">Все пиццы</h2>
-      <div className="content__items">
-        {isLoading
-          ? [...new Array(9)].map((_, index) => <Skeleton key={index} />)
-          : items.map((obj) => <PizzaBlock key={obj.id} {...obj} />)}
-      </div>
+      <div className="content__items">{isLoading ? skeletons : pizzas}</div>
     </div>
   );
 }
