@@ -8,13 +8,20 @@ import Skeleton from '../components/PizzaBlock/Skeleton';
 import Pagination from '../components/Pagination/Pagination';
 import Sort, { sortList } from '../components/Sort';
 
-import { useSelector, useDispatch } from 'react-redux';
-import { selectFilter, setCategoryId, setCurrentPage, setFilters } from '../redux/slices/filterSlice';
+import { useSelector } from 'react-redux';
+import { useAppDispatch } from '../redux/store';
+import {
+  selectFilter,
+  setCategoryId,
+  setCurrentPage,
+  setFilters,
+  type FilterState,
+} from '../redux/slices/filterSlice';
 import { fetchPizzas, selectPizzaData } from '../redux/slices/pizzaSlice';
 
 export default function Home() {
   const navigate = useNavigate();
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
   const isMounted = useRef<boolean>(false);
   const { items, status } = useSelector(selectPizzaData);
   const { categoryId, sort, currentPage, searchValue } = useSelector(selectFilter);
@@ -23,8 +30,8 @@ export default function Home() {
     dispatch(setCategoryId(id));
   };
 
-  const onChangePage = (number: number) => {
-    dispatch(setCurrentPage(number));
+  const onChangePage = (pageNum: number) => {
+    dispatch(setCurrentPage(pageNum));
   };
 
   useEffect(() => {
@@ -45,12 +52,9 @@ export default function Home() {
       const params = qs.parse(window.location.search.substring(1));
 
       const sort = sortList.find((obj) => obj.sortProperty === params.sortProperty);
+      console.log(sort)
       dispatch(
-        setFilters({
-          ...params,
-          sort,
-        }),
-      );
+        setFilters({...params,sort} as FilterState));
     }
   }, []);
 
@@ -61,8 +65,7 @@ export default function Home() {
       const category = categoryId !== 0 ? `category=${categoryId}` : '';
       const search = searchValue ? `&search=${searchValue.trim()}` : '';
 
-      //@ts-ignore
-      dispatch(fetchPizzas({ sortBy, order, category, search, currentPage }));
+      dispatch(fetchPizzas({ sortBy, order, category, search, currentPage: String(currentPage) }));
     }
     window.scrollTo(0, 0);
     fetchData();
@@ -79,11 +82,9 @@ export default function Home() {
       </div>
       <h2 className="content__title">Все пиццы</h2>
       {status === 'error' ? (
-        <div className='content__error-info'>
+        <div className="content__error-info">
           <h2>Произошла ошибка 😕</h2>
-          <p>
-            К сожалению, не удалось получить список пиц. Попробуйте повторить попытку позже.
-          </p>
+          <p>К сожалению, не удалось получить список пиц. Попробуйте повторить попытку позже.</p>
         </div>
       ) : (
         <div className="content__items">{status === 'loading' ? skeletons : pizzas}</div>
