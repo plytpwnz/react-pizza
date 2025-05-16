@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 import qs from 'qs';
 import { useNavigate } from 'react-router-dom';
 
@@ -26,9 +26,12 @@ export default function Home() {
   const { items, status } = useSelector(selectPizzaData);
   const { categoryId, sort, currentPage, searchValue } = useSelector(selectFilter);
 
-  const onChangeCategory = (id: number) => {
+  const pizzas = items.map((obj) => <PizzaBlock key={obj.id} {...obj} />);
+  const skeletons = [...new Array(4)].map((_, index) => <Skeleton key={index} />);
+
+  const onChangeCategory = useCallback((id: number) => {
     dispatch(setCategoryId(id));
-  };
+  }, []);
 
   const onChangePage = (pageNum: number) => {
     dispatch(setCurrentPage(pageNum));
@@ -52,9 +55,7 @@ export default function Home() {
       const params = qs.parse(window.location.search.substring(1));
 
       const sort = sortList.find((obj) => obj.sortProperty === params.sortProperty);
-      console.log(sort)
-      dispatch(
-        setFilters({...params,sort} as FilterState));
+      dispatch(setFilters({ ...params, sort } as FilterState));
     }
   }, []);
 
@@ -71,14 +72,11 @@ export default function Home() {
     fetchData();
   }, [categoryId, sort.sortProperty, searchValue, currentPage]);
 
-  const pizzas = items.map((obj) => <PizzaBlock key={obj.id} {...obj} />);
-  const skeletons = [...new Array(4)].map((_, index) => <Skeleton key={index} />);
-
   return (
     <div className="container">
       <div className="content__top">
         <Categories value={categoryId} onChangeCategory={onChangeCategory} />
-        <Sort />
+        <Sort value={sort} />
       </div>
       <h2 className="content__title">Все пиццы</h2>
       {status === 'error' ? (

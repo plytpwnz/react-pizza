@@ -34,9 +34,13 @@ export default function CartItem({ id, name, type, size, price, count, imageUrl 
         </p>
       </div>
       <div className="cart__item-count">
-        <div
+        <button
           onClick={onClickMinus}
-          className="button button--outline button--circle cart__item-count-minus">
+          className={
+            count > 1
+              ? 'button button--outline button--circle cart__item-count-minus'
+              : 'button button--outline button--circle cart__item-count-minus-disabled'
+          }>
           <svg
             width="10"
             height="10"
@@ -52,9 +56,9 @@ export default function CartItem({ id, name, type, size, price, count, imageUrl 
               fill="#EB5A1E"
             />
           </svg>
-        </div>
+        </button>
         <b>{count}</b>
-        <div
+        <button
           onClick={onClickPlus}
           className="button button--outline button--circle cart__item-count-plus">
           <svg
@@ -72,7 +76,7 @@ export default function CartItem({ id, name, type, size, price, count, imageUrl 
               fill="#EB5A1E"
             />
           </svg>
-        </div>
+        </button>
       </div>
       <div className="cart__item-price">
         <b>{price * count} ₽</b>

@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
-import { useSelector, useDispatch } from 'react-redux';
-import { selectSort, setSort, type SortItem } from '../redux/slices/filterSlice';
+import { useDispatch } from 'react-redux';
+import { setSort, type SortItem } from '../redux/slices/filterSlice';
 
 export const sortList: SortItem[] = [
   { name: 'популярности (▼)', sortProperty: 'rating' },
@@ -11,11 +11,14 @@ export const sortList: SortItem[] = [
   { name: 'алфавиту (▲)', sortProperty: '-title' },
 ];
 
-export default function Sort() {
-  const dispatch = useDispatch();
-  const sort = useSelector(selectSort);
-  const sortRef = useRef<HTMLDivElement>(null);
+type SortProps = {
+  value: SortItem;
+};
+
+export default function Sort({ value }: SortProps) {
   const [open, setOpen] = useState<boolean>(false);
+  const sortRef = useRef<HTMLDivElement>(null);
+  const dispatch = useDispatch();
 
   const onClickListItem = (obj: SortItem) => {
     dispatch(setSort(obj));
@@ -24,8 +27,8 @@ export default function Sort() {
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (sortRef.current && !event.composedPath().includes(sortRef.current)){
-        setOpen(false)
+      if (sortRef.current && !event.composedPath().includes(sortRef.current)) {
+        setOpen(false);
       }
     };
 
@@ -38,7 +41,7 @@ export default function Sort() {
     <div ref={sortRef} className="sort">
       <div className="sort__label">
         <b>Сортировка по:</b>
-        <span onClick={() => setOpen((prev) => !prev)}>{sort.name}</span>
+        <span onClick={() => setOpen((prev) => !prev)}>{value.name}</span>
       </div>
       {open && (
         <div className="sort__popup">
@@ -46,7 +49,7 @@ export default function Sort() {
             {sortList.map((obj) => (
               <li
                 key={obj.name}
-                className={sort.sortProperty === obj.sortProperty ? 'active' : ''}
+                className={value.sortProperty === obj.sortProperty ? 'active' : ''}
                 onClick={() => onClickListItem(obj)}>
                 {obj.name}
               </li>

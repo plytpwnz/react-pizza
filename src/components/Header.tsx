@@ -1,12 +1,23 @@
 import { Link, useLocation } from 'react-router-dom';
-import Search from './Search/Search';
 import { useSelector } from 'react-redux';
 import { selectCart } from '../redux/slices/cartSlice';
+import { useEffect, useRef } from 'react';
+import Search from './Search/Search';
 
 export default function Header() {
   const { items, totalPrice } = useSelector(selectCart);
-  const totalCount = items.reduce((sum: number, item: any) => item.count + sum, 0);
+  const totalCount = items.reduce((sum: number, item) => item.count + sum, 0);
+  const isMounted = useRef<boolean>(false);
   const { pathname } = useLocation();
+
+  useEffect(() => {
+    if (isMounted.current) {
+      const json = JSON.stringify(items);
+      localStorage.setItem('cart', json);
+    }
+
+    isMounted.current = true;
+  }, [items]);
 
   return (
     <div className="header">
@@ -20,7 +31,7 @@ export default function Header() {
             </div>
           </div>
         </Link>
-        <Search />
+        {pathname !== '/cart' && <Search />}
         <div className="header__cart">
           {pathname !== '/cart' && (
             <Link to="/cart" className="button button--cart">
